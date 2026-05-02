@@ -60,6 +60,7 @@ model User {
 model AppointmentType {
   id                     String           @id @default(cuid())
   organiserId            String
+  categoryId             String?
   name                   String
   description            String?
   durationMinutes        Int
@@ -78,11 +79,29 @@ model AppointmentType {
   updatedAt              DateTime         @updatedAt
 
   organiser        User              @relation("OrganiserServices", fields: [organiserId], references: [id])
+  category         ServiceCategory?  @relation(fields: [categoryId], references: [id])
   resources        Resource[]
   workingHours     WorkingHours[]
   flexibleSlots    FlexibleSlot[]
   bookingQuestions BookingQuestion[]
   bookings         Booking[]
+
+  @@index([categoryId])
+  @@index([isPublished])
+}
+
+model ServiceCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  icon        String?  // lucide icon name
+  color       String?  // hex
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  services AppointmentType[]
 }
 
 model Resource {

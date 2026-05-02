@@ -2,15 +2,29 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import api from '../lib/api'
-import type { AppointmentType } from '../types'
+import type { AppointmentType, ServiceCategory } from '../types'
 
-export function useServices() {
+export function useServices(filters?: { category?: string; q?: string }) {
   return useQuery<AppointmentType[]>({
-    queryKey: ['services'],
+    queryKey: ['services', filters?.category, filters?.q],
     queryFn: async () => {
-      const res = await api.get('/services')
+      const params: Record<string, string> = {}
+      if (filters?.category) params.category = filters.category
+      if (filters?.q) params.q = filters.q
+      const res = await api.get('/services', { params })
       return res.data.services
     },
+  })
+}
+
+export function useCategories() {
+  return useQuery<ServiceCategory[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await api.get('/services/categories')
+      return res.data.categories
+    },
+    staleTime: 5 * 60 * 1000,
   })
 }
 

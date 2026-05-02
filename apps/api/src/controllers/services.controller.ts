@@ -5,6 +5,7 @@ import { ApiError } from '../utils/ApiError'
 import { randomUUID } from 'crypto'
 
 const serviceInclude = {
+  category: true,
   resources: { include: { user: { select: { id: true, name: true, email: true } } } },
   workingHours: { orderBy: { dayOfWeek: 'asc' as const } },
   flexibleSlots: { where: { isActive: true } },
@@ -12,13 +13,33 @@ const serviceInclude = {
   _count: { select: { bookings: true } },
 }
 
-export const listPublished = asyncHandler(async (_req: Request, res: Response) => {
+export const listPublished = asyncHandler(async (req: Request, res: Response) => {
+  const { categoryId, category, q } = req.query as Record<string, string | undefined>
+  const where: Record<string, unknown> = { isPublished: true }
+  if (categoryId) where.categoryId = categoryId
+  if (category) where.category = { slug: category }
+  if (q && q.trim()) {
+    where.OR = [
+      { name: { contains: q, mode: 'insensitive' } },
+      { description: { contains: q, mode: 'insensitive' } },
+      { location: { contains: q, mode: 'insensitive' } },
+    ]
+  }
   const services = await prisma.appointmentType.findMany({
-    where: { isPublished: true },
+    where,
     include: serviceInclude,
     orderBy: { createdAt: 'desc' },
   })
   res.json({ success: true, services })
+})
+
+export const listCategories = asyncHandler(async (_req: Request, res: Response) => {
+  const categories = await prisma.serviceCategory.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' },
+    include: { _count: { select: { services: { where: { isPublished: true } } } } },
+  })
+  res.json({ success: true, categories })
 })
 
 export const listMine = asyncHandler(async (req: Request, res: Response) => {

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, Trash2, ChevronLeft } from 'lucide-react'
-import { useCreateService, useSetWorkingHours, useAddQuestion } from '@/hooks/useServices'
+import { useCreateService, useSetWorkingHours, useAddQuestion, useCategories } from '@/hooks/useServices'
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const DURATIONS = [15, 30, 45, 60, 90, 120]
@@ -22,6 +22,7 @@ const schema = z.object({
   requiresAdvancePayment: z.boolean(),
   advancePaymentAmount: z.number().positive().optional(),
   location: z.string().optional(),
+  categoryId: z.string().optional().nullable(),
 })
 type FormData = z.infer<typeof schema>
 
@@ -35,6 +36,7 @@ const defaultHours = DAY_NAMES.map((_, i) => ({
 export default function NewServicePage() {
   const router = useRouter()
   const createService = useCreateService()
+  const { data: categories } = useCategories()
   const [step, setStep] = useState(1)
   const [serviceId, setServiceId] = useState<string | null>(null)
   const [workingHours, setWorkingHours] = useState(defaultHours)
@@ -121,6 +123,28 @@ export default function NewServicePage() {
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
             <textarea {...register('description')} rows={3} className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Category</label>
+            <div className="flex flex-wrap gap-2">
+              {(categories ?? []).map((cat) => {
+                const selected = watch('categoryId') === cat.id
+                return (
+                  <button
+                    type="button"
+                    key={cat.id}
+                    onClick={() => setValue('categoryId', selected ? null : cat.id)}
+                    className="px-3 py-1.5 rounded-xl text-sm font-medium transition-all"
+                    style={selected
+                      ? { background: cat.color || 'var(--brand-accent)', color: 'white' }
+                      : { background: 'var(--surface-2)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}
+                  >
+                    {cat.name}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           <div>

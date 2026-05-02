@@ -31,6 +31,18 @@ export interface BookingQuestion {
   sequence: number
 }
 
+export interface ServiceCategory {
+  id: string
+  slug: string
+  name: string
+  description?: string | null
+  icon?: string | null
+  color?: string | null
+  sortOrder: number
+  isActive: boolean
+  _count?: { services: number }
+}
+
 export interface AppointmentType {
   id: string
   name: string
@@ -48,6 +60,8 @@ export interface AppointmentType {
   location?: string | null
   coverImageUrl?: string | null
   organiserId: string
+  categoryId?: string | null
+  category?: ServiceCategory | null
   resources: Resource[]
   workingHours: WorkingHours[]
   bookingQuestions: BookingQuestion[]

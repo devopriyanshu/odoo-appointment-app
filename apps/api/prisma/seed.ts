@@ -28,7 +28,18 @@ async function main() {
   await prisma.flexibleSlot.deleteMany()
   await prisma.resource.deleteMany()
   await prisma.appointmentType.deleteMany()
+  await prisma.serviceCategory.deleteMany()
   await prisma.user.deleteMany()
+
+  // Service categories
+  const [healthCat, beautyCat, fitnessCat, businessCat, educationCat, eventCat] = await Promise.all([
+    prisma.serviceCategory.create({ data: { slug: 'health', name: 'Health & Wellness', description: 'Doctors, dentists, therapists', icon: 'Stethoscope', color: '#10b981', sortOrder: 1 } }),
+    prisma.serviceCategory.create({ data: { slug: 'beauty', name: 'Beauty & Spa', description: 'Salon, spa, grooming services', icon: 'Sparkles', color: '#ec4899', sortOrder: 2 } }),
+    prisma.serviceCategory.create({ data: { slug: 'fitness', name: 'Fitness & Sports', description: 'Trainers, yoga, sports coaching', icon: 'Dumbbell', color: '#f59e0b', sortOrder: 3 } }),
+    prisma.serviceCategory.create({ data: { slug: 'business', name: 'Business & Consulting', description: 'Meetings, consultations, advisory', icon: 'Briefcase', color: '#6366f1', sortOrder: 4 } }),
+    prisma.serviceCategory.create({ data: { slug: 'education', name: 'Education & Tutoring', description: 'Classes, lessons, mentorship', icon: 'GraduationCap', color: '#0ea5e9', sortOrder: 5 } }),
+    prisma.serviceCategory.create({ data: { slug: 'events', name: 'Events & Venues', description: 'Conference rooms, event spaces', icon: 'Calendar', color: '#8b5cf6', sortOrder: 6 } }),
+  ])
 
   // Create users
   const [admin, organiser, customer, customer2] = await Promise.all([
@@ -77,6 +88,7 @@ async function main() {
   const dentalService = await prisma.appointmentType.create({
     data: {
       organiserId: organiser.id,
+      categoryId: healthCat.id,
       name: 'Dental Checkup',
       description: 'Comprehensive dental examination and cleaning by Dr. Sharma. Includes X-ray evaluation and personalized treatment plan.',
       durationMinutes: 30,
@@ -126,6 +138,7 @@ async function main() {
   const confService = await prisma.appointmentType.create({
     data: {
       organiserId: organiser.id,
+      categoryId: eventCat.id,
       name: 'Conference Room A',
       description: 'Spacious conference room for team meetings, workshops, and client presentations. Capacity: 10 people.',
       durationMinutes: 60,
