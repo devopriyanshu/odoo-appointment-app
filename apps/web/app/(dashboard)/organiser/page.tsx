@@ -4,12 +4,15 @@ import { useRouter } from 'next/navigation'
 import { CalendarDays, CheckCircle, Clock, XCircle, Plus, IndianRupee } from 'lucide-react'
 import { format } from 'date-fns'
 import api from '@/lib/api'
+import { useUpdateBookingStatus, useCancelBooking } from '@/hooks/useBookings'
 import { BookingStatusBadge } from '@/components/booking/BookingStatusBadge'
 import { StatCardSkeleton } from '@/components/shared/LoadingSkeleton'
 import type { AnalyticsSummary, Booking } from '@/types'
 
 export default function OrganiserDashboard() {
   const router = useRouter()
+  const updateStatus = useUpdateBookingStatus()
+  const cancelBooking = useCancelBooking()
 
   const { data: summary, isLoading: sumLoading } = useQuery<AnalyticsSummary>({
     queryKey: ['analytics', 'summary'],
@@ -90,12 +93,32 @@ export default function OrganiserDashboard() {
                   <td className="px-5 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>{b.resource?.name || '—'}</td>
                   <td className="px-5 py-3"><BookingStatusBadge status={b.status} /></td>
                   <td className="px-5 py-3">
-                    {b.status === 'PENDING' && (
-                      <button onClick={(e) => { e.stopPropagation(); api.patch(`/bookings/${b.id}/confirm`) }}
-                        className="text-xs px-3 py-1 rounded-lg" style={{ background: 'rgba(0,212,170,0.15)', color: '#00d4aa' }}>
-                        Confirm
-                      </button>
-                    )}
+                    <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                      {b.status === 'PENDING' && (
+                        <button onClick={() => updateStatus.mutate({ id: b.id, action: 'confirm' })}
+                          className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(0,212,170,0.15)', color: '#00d4aa' }}>
+                          Confirm
+                        </button>
+                      )}
+                      {b.status === 'CONFIRMED' && new Date(b.scheduledStart) < new Date() && (
+                        <>
+                          <button onClick={() => updateStatus.mutate({ id: b.id, action: 'complete' })}
+                            className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(108,99,255,0.15)', color: 'var(--brand-accent)' }}>
+                            Complete
+                          </button>
+                          <button onClick={() => updateStatus.mutate({ id: b.id, action: 'no-show' })}
+                            className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(240,165,0,0.15)', color: '#f0a500' }}>
+                            No-show
+                          </button>
+                        </>
+                      )}
+                      {(b.status === 'PENDING' || b.status === 'CONFIRMED') && new Date(b.scheduledStart) > new Date() && (
+                        <button onClick={() => cancelBooking.mutate({ id: b.id })}
+                          className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(255,77,109,0.15)', color: '#ff4d6d' }}>
+                          Cancel
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

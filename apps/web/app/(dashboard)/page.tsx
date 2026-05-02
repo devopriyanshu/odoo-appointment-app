@@ -1,7 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Search, Clock } from 'lucide-react'
 import { useServices } from '@/hooks/useServices'
+import { useAuthStore } from '@/store/authStore'
 import { ServiceCard } from '@/components/booking/ServiceCard'
 import { ServiceCardSkeleton } from '@/components/shared/LoadingSkeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -10,9 +12,18 @@ import type { AppointmentType } from '@/types'
 const filters = ['All', '30 min', '60 min', '90 min']
 
 export default function HomePage() {
+  const router = useRouter()
+  const { user } = useAuthStore()
   const { data: services, isLoading } = useServices()
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
+
+  // Admin users don't book appointments — redirect to dashboard
+  useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      router.replace('/organiser')
+    }
+  }, [user?.role, router])
 
   const filtered = (services || []).filter((s: AppointmentType) => {
     const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||

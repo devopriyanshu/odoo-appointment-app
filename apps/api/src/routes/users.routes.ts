@@ -7,7 +7,7 @@ const router = Router()
 
 router.use(authenticate)
 
-router.get('/', requireRole('ADMIN'), usersController.listUsers)
+router.get('/', requireRole('ADMIN', 'ORGANISER'), usersController.listUsers)
 router.get('/:id', usersController.getUser)
 router.patch('/:id', usersController.updateUser)
 router.delete('/:id', requireRole('ADMIN'), usersController.deleteUser)

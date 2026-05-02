@@ -46,7 +46,7 @@ export default function ServiceEditPage() {
   const serviceId = params.id as string
   const queryClient = useQueryClient()
 
-  const [tab, setTab] = useState<'details' | 'availability' | 'questions'>('details')
+  const [tab, setTab] = useState<'details' | 'availability' | 'questions' | 'resources' | 'flexible-slots'>('details')
   const [workingHours, setWorkingHours] = useState(
     DAY_NAMES.map((_, i) => ({ dayOfWeek: i, startTime: '09:00', endTime: '17:00', isActive: i >= 1 && i <= 5 }))
   )
@@ -172,8 +172,11 @@ export default function ServiceEditPage() {
 
   const TABS = [
     { key: 'details', label: 'Details' },
-    { key: 'availability', label: 'Availability' },
+    service?.slotScheduleType === 'FLEXIBLE' 
+      ? { key: 'flexible-slots', label: 'Flexible Slots' }
+      : { key: 'availability', label: 'Availability' },
     { key: 'questions', label: 'Questions' },
+    { key: 'resources', label: 'Resources' },
   ] as const
 
   return (
@@ -225,7 +228,7 @@ export default function ServiceEditPage() {
       {/* Tabs */}
       <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--surface-2)' }}>
         {TABS.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)}
+          <button key={t.key} onClick={() => setTab(t.key as any)}
             className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
             style={tab === t.key ? { background: 'var(--brand-accent)', color: 'white' } : { color: 'var(--text-muted)' }}>
             {t.label}
@@ -271,6 +274,34 @@ export default function ServiceEditPage() {
               <input {...register('location')} placeholder="Address or virtual link"
                 className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
                 style={{ background: 'var(--surface-3)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }} />
+            </div>
+            
+            {/* Service & Schedule Types */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Service Type</label>
+                <div className="flex bg-[var(--surface-3)] p-1 rounded-xl">
+                  {(['USER', 'RESOURCE'] as const).map(t => (
+                    <button type="button" key={t} onClick={() => setValue('resourceType', t)}
+                      className="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all"
+                      style={watch('resourceType') === t ? { background: 'var(--surface-1)', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: 'var(--text-muted)' }}>
+                      {t === 'USER' ? 'Personnel' : 'Facility/Eqp'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Schedule Type</label>
+                <div className="flex bg-[var(--surface-3)] p-1 rounded-xl">
+                  {(['WEEKLY', 'FLEXIBLE'] as const).map(t => (
+                    <button type="button" key={t} onClick={() => setValue('slotScheduleType', t)}
+                      className="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all"
+                      style={watch('slotScheduleType') === t ? { background: 'var(--surface-1)', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: 'var(--text-muted)' }}>
+                      {t === 'WEEKLY' ? 'Weekly' : 'Flexible'}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
             {/* Booking Rules */}
             <div className="space-y-3 pt-1">
@@ -384,6 +415,30 @@ export default function ServiceEditPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab: Resources ── */}
+      {tab === 'resources' && (
+        <div className="space-y-4">
+          <div className="rounded-2xl p-5 space-y-3" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
+            <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Assigned Resources</h2>
+            <p className="text-sm py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+              Coming in Phase 3 — Assign specific personnel or facilities to this service.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab: Flexible Slots ── */}
+      {tab === 'flexible-slots' && (
+        <div className="space-y-4">
+          <div className="rounded-2xl p-5 space-y-3" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
+            <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Flexible Slots</h2>
+            <p className="text-sm py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+              Coming in Phase 3 — Create specific date/time slots for events, classes, or irregular schedules.
+            </p>
           </div>
         </div>
       )}

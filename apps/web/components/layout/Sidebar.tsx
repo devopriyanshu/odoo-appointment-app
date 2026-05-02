@@ -20,16 +20,15 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Home', href: '/', icon: <LayoutGrid size={20} />, roles: ['CUSTOMER', 'ORGANISER', 'ADMIN'] },
+  { label: 'Home', href: '/', icon: <LayoutGrid size={20} />, roles: ['CUSTOMER', 'ORGANISER'] },
   { label: 'My Appointments', href: '/appointments', icon: <CalendarCheck size={20} />, roles: ['CUSTOMER'] },
   { label: 'Dashboard', href: '/organiser', icon: <BarChart2 size={20} />, roles: ['ORGANISER', 'ADMIN'] },
-  { label: 'My Services', href: '/organiser/services', icon: <Briefcase size={20} />, roles: ['ORGANISER', 'ADMIN'] },
+  { label: 'My Services', href: '/organiser/services', icon: <Briefcase size={20} />, roles: ['ORGANISER'] },
   { label: 'All Bookings', href: '/organiser/bookings', icon: <BookOpen size={20} />, roles: ['ORGANISER', 'ADMIN'] },
   { label: 'Calendar', href: '/organiser/calendar', icon: <Calendar size={20} />, roles: ['ORGANISER', 'ADMIN'] },
-  { label: 'Admin Panel', href: '/admin', icon: <Shield size={20} />, roles: ['ADMIN'] },
   { label: 'Users', href: '/admin/users', icon: <Users size={20} />, roles: ['ADMIN'] },
-  { label: 'Analytics', href: '/admin/analytics', icon: <TrendingUp size={20} />, roles: ['ADMIN'] },
-  { label: 'My Appointments', href: '/appointments', icon: <CalendarCheck size={20} />, roles: ['ORGANISER', 'ADMIN'] },
+  { label: 'Analytics', href: '/organiser/analytics', icon: <TrendingUp size={20} />, roles: ['ORGANISER'] },
+  { label: 'My Appointments', href: '/appointments', icon: <CalendarCheck size={20} />, roles: ['ORGANISER'] },
   { label: 'Profile', href: '/profile', icon: <User size={20} />, roles: ['CUSTOMER', 'ORGANISER', 'ADMIN'] },
 ]
 

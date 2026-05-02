@@ -9,6 +9,8 @@ interface BookingFilters {
   serviceId?: string
   page?: number
   limit?: number
+  from?: string
+  to?: string
 }
 
 export function useBookings(filters: BookingFilters = {}) {
@@ -42,6 +44,7 @@ export function useCreateBooking() {
       capacity?: number
       answers?: Array<{ questionId: string; answer: string }>
       paymentReference?: string
+      customerId?: string
     }) => {
       const res = await api.post('/bookings', data)
       return res.data.booking as Booking
@@ -68,6 +71,7 @@ export function useCancelBooking() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bookings'] })
+      qc.invalidateQueries({ queryKey: ['analytics'] })
       toast.success('Appointment cancelled')
     },
     onError: (err: unknown) => {
@@ -87,6 +91,7 @@ export function useRescheduleBooking() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bookings'] })
       qc.invalidateQueries({ queryKey: ['slots'] })
+      qc.invalidateQueries({ queryKey: ['analytics'] })
       toast.success('Appointment rescheduled')
     },
     onError: (err: unknown) => {
@@ -105,6 +110,7 @@ export function useUpdateBookingStatus() {
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['bookings'] })
+      qc.invalidateQueries({ queryKey: ['analytics'] })
       toast.success(`Booking ${vars.action}ed`)
     },
   })
