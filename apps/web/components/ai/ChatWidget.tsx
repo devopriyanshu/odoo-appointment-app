@@ -47,9 +47,15 @@ function nextMissing(draft: Draft, service?: { resources?: { id: string; name: s
 }
 
 export function ChatWidget() {
-  const { chatOpen, toggleChat } = useUIStore()
+  const { chatOpen, toggleChat, openChat } = useUIStore()
   const { user } = useAuthStore()
   const router = useRouter()
+
+  useEffect(() => {
+    const handler = () => openChat?.()
+    window.addEventListener('open-chat', handler)
+    return () => window.removeEventListener('open-chat', handler)
+  }, [openChat])
 
   // Only customers see this widget
   if (!user || user.role !== 'CUSTOMER') return null

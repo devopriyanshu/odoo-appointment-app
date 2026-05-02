@@ -13,6 +13,7 @@ export const createServiceSchema = z.object({
   advancePaymentAmount: z.number().positive().optional(),
   location: z.string().max(500).optional(),
   coverImageUrl: z.string().url().optional(),
+  categoryId: z.string().cuid().nullish(),
 })
 
 export const updateServiceSchema = createServiceSchema.partial()

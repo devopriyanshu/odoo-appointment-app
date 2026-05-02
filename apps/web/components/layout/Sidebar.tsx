@@ -55,16 +55,16 @@ export function Sidebar() {
 
   return (
     <motion.aside
-      animate={{ width: sidebarOpen ? 256 : 72 }}
+      animate={{ width: sidebarOpen ? 240 : 72 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className="fixed left-0 top-0 h-full z-40 flex flex-col overflow-hidden"
-      style={{ background: 'var(--surface-1)', borderRight: '1px solid var(--border-color)' }}
+      style={{ background: 'var(--brand-dark)', color: 'rgba(255,255,255,0.9)' }}
     >
       {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--brand-accent)' }}>
-          <Calendar size={18} className="text-white" />
+      <div className="flex items-center h-16 px-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: 'rgba(255,255,255,0.95)', color: 'var(--brand-dark)' }}>
+          <Calendar size={18} strokeWidth={2.5} />
         </div>
         <AnimatePresence>
           {sidebarOpen && (
@@ -72,10 +72,9 @@ export function Sidebar() {
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
-              className="ml-3 font-bold text-base whitespace-nowrap overflow-hidden"
-              style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', color: 'var(--text-primary)' }}
+              className="ml-3 font-bold text-base whitespace-nowrap overflow-hidden text-white"
             >
-              AppointmentPro
+              Slotly
             </motion.span>
           )}
         </AnimatePresence>
@@ -89,19 +88,25 @@ export function Sidebar() {
             <Link key={item.href + item.label} href={item.href}>
               <div
                 className={cn(
-                  'flex items-center h-11 px-4 mx-2 mb-0.5 rounded-lg transition-all duration-150 cursor-pointer relative',
-                  active ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-3)]'
+                  'flex items-center h-10 px-3 mx-2 mb-1 rounded-xl transition-all duration-150 cursor-pointer relative',
                 )}
-                style={active ? { background: 'var(--brand-accent)', borderLeft: 'none' } : {}}
+                style={active
+                  ? { background: 'rgba(255,255,255,0.12)', color: 'white' }
+                  : { color: 'rgba(255,255,255,0.65)' }}
+                onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
+                onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
               >
-                <span className="flex-shrink-0">{item.icon}</span>
+                {active && (
+                  <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full" style={{ background: 'var(--brand-accent-2)' }} />
+                )}
+                <span className="flex-shrink-0 flex items-center justify-center w-8">{item.icon}</span>
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="ml-3 text-sm font-medium whitespace-nowrap"
+                      className="ml-2 text-sm font-medium whitespace-nowrap"
                     >
                       {item.label}
                     </motion.span>
@@ -114,12 +119,11 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom: User + Collapse */}
-      <div className="border-t py-3" style={{ borderColor: 'var(--border-color)' }}>
-        {/* User info */}
+      <div className="py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="flex items-center px-4 mb-2">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-            style={{ background: 'var(--brand-accent)' }}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+            style={{ background: 'var(--brand-accent-2)', color: 'var(--brand-dark)' }}
           >
             {user?.name?.[0]?.toUpperCase() || 'U'}
           </div>
@@ -129,13 +133,13 @@ export function Sidebar() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="ml-2 overflow-hidden"
+                className="ml-3 overflow-hidden"
               >
-                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)', maxWidth: 140 }}>
+                <p className="text-sm font-medium truncate text-white" style={{ maxWidth: 140 }}>
                   {user?.name}
                 </p>
-                <span className="text-xs px-1.5 py-0.5 rounded-full" style={{
-                  background: 'rgba(108,99,255,0.2)', color: 'var(--brand-accent)', fontSize: 10
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{
+                  background: 'rgba(20,184,166,0.2)', color: 'var(--brand-accent-2)',
                 }}>
                   {role}
                 </span>
@@ -144,13 +148,14 @@ export function Sidebar() {
           </AnimatePresence>
         </div>
 
-        {/* Logout */}
         <button
           onClick={() => logout.mutate()}
-          className="flex items-center h-10 px-4 mx-2 rounded-lg transition-all duration-150 w-[calc(100%-16px)] hover:bg-red-500/10 hover:text-red-400"
-          style={{ color: 'var(--text-muted)' }}
+          className="flex items-center h-10 px-3 mx-2 rounded-xl w-[calc(100%-16px)] transition-all"
+          style={{ color: 'rgba(255,255,255,0.65)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,77,109,0.12)'; e.currentTarget.style.color = '#fca5a5' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}
         >
-          <LogOut size={18} className="flex-shrink-0" />
+          <LogOut size={18} className="flex-shrink-0 ml-1" />
           <AnimatePresence>
             {sidebarOpen && (
               <motion.span
@@ -165,11 +170,12 @@ export function Sidebar() {
           </AnimatePresence>
         </button>
 
-        {/* Toggle */}
         <button
           onClick={toggleSidebar}
-          className="flex items-center justify-center w-8 h-8 rounded-lg mx-auto mt-2 transition-all hover:bg-[var(--surface-3)]"
-          style={{ color: 'var(--text-muted)' }}
+          className="flex items-center justify-center w-8 h-8 rounded-lg mx-auto mt-2 transition-all"
+          style={{ color: 'rgba(255,255,255,0.5)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
         >
           {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </button>

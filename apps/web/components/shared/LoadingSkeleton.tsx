@@ -1,23 +1,22 @@
 import { cn } from '@/lib/utils'
 
 function Skeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn('animate-pulse rounded-lg', className)}
-      style={{ background: 'var(--surface-3)' }}
-    />
-  )
+  return <div className={cn('skeleton', className)} />
 }
 
 export function ServiceCardSkeleton() {
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
+    <div className="card-soft overflow-hidden" style={{ border: '1px solid var(--border-color)' }}>
       <Skeleton className="h-32 rounded-none" />
       <div className="p-5 space-y-3">
         <Skeleton className="h-5 w-3/4" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />
-        <Skeleton className="h-10 w-full mt-4" />
+        <div className="flex gap-2 pt-1">
+          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+        <Skeleton className="h-10 w-full" />
       </div>
     </div>
   )

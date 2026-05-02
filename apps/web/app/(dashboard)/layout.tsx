@@ -8,7 +8,7 @@ import { motion } from 'framer-motion'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { sidebarOpen } = useUIStore()
-  const marginLeft = sidebarOpen ? 256 : 72
+  const marginLeft = sidebarOpen ? 240 : 72
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--brand-primary)' }}>

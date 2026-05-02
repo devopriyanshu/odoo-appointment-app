@@ -6,6 +6,7 @@ import { requireRole } from '../middleware/rbac'
 const router = Router()
 
 router.get('/', ctrl.listPublished)
+router.get('/categories', ctrl.listCategories)
 router.get('/share/:token', ctrl.getByShareToken)
 router.get('/mine', authenticate, ctrl.listMine)
 router.get('/:id', ctrl.getService)
