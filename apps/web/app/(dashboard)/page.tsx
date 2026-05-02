@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useServices, useCategories } from '@/hooks/useServices'
+
 import { useAuthStore } from '@/store/authStore'
 import { ServiceCard } from '@/components/booking/ServiceCard'
 import { ServiceCardSkeleton } from '@/components/shared/LoadingSkeleton'
@@ -26,14 +28,18 @@ function CategoryIcon({ name, size = 20, className }: { name?: string | null; si
 export default function HomePage() {
   const router = useRouter()
   const { user } = useAuthStore()
+
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
 
   const { data: categories } = useCategories()
   const { data: services, isLoading } = useServices({
     category: selectedCategory ?? undefined,
     q: debouncedSearch || undefined,
+
+
   })
 
   useEffect(() => {
