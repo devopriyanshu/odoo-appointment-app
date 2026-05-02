@@ -1,0 +1,190 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin", "darwin-arm64"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ORGANISER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  RESCHEDULED
+  COMPLETED
+  NO_SHOW
+}
+
+enum SlotScheduleType {
+  WEEKLY
+  FLEXIBLE
+}
+
+enum ResourceType {
+  USER
+  RESOURCE
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  WAIVED
+  REFUNDED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      Role     @default(CUSTOMER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  managedServices    AppointmentType[] @relation("OrganiserServices")
+  bookingsAsCustomer Booking[]         @relation("CustomerBookings")
+  resourceProfile    Resource?
+  aiChatSessions     AIChatSession[]
+}
+
+model AppointmentType {
+  id                     String           @id @default(cuid())
+  organiserId            String
+  name                   String
+  description            String?
+  durationMinutes        Int
+  resourceType           ResourceType     @default(USER)
+  slotScheduleType       SlotScheduleType @default(WEEKLY)
+  maxCapacityPerSlot     Int              @default(1)
+  manageCapacity         Boolean          @default(false)
+  requiresManualConfirm  Boolean          @default(false)
+  requiresAdvancePayment Boolean          @default(false)
+  advancePaymentAmount   Decimal?         @db.Decimal(10, 2)
+  isPublished            Boolean          @default(false)
+  shareToken             String?          @unique
+  location               String?
+  coverImageUrl          String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  organiser        User              @relation("OrganiserServices", fields: [organiserId], references: [id])
+  resources        Resource[]
+  workingHours     WorkingHours[]
+  flexibleSlots    FlexibleSlot[]
+  bookingQuestions BookingQuestion[]
+  bookings         Booking[]
+}
+
+model Resource {
+  id                String       @id @default(cuid())
+  appointmentTypeId String
+  userId            String?      @unique
+  name              String
+  resourceType      ResourceType @default(USER)
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+
+  appointmentType AppointmentType @relation(fields: [appointmentTypeId], references: [id], onDelete: Cascade)
+  user            User?           @relation(fields: [userId], references: [id])
+  bookings        Booking[]
+}
+
+model WorkingHours {
+  id                String  @id @default(cuid())
+  appointmentTypeId String
+  dayOfWeek         Int
+  startTime         String
+  endTime           String
+  isActive          Boolean @default(true)
+
+  appointmentType AppointmentType @relation(fields: [appointmentTypeId], references: [id], onDelete: Cascade)
+}
+
+model FlexibleSlot {
+  id                String   @id @default(cuid())
+  appointmentTypeId String
+  startDatetime     DateTime
+  endDatetime       DateTime
+  maxCapacity       Int      @default(1)
+  isActive          Boolean  @default(true)
+
+  appointmentType AppointmentType @relation(fields: [appointmentTypeId], references: [id], onDelete: Cascade)
+}
+
+model BookingQuestion {
+  id                String  @id @default(cuid())
+  appointmentTypeId String
+  question          String
+  isRequired        Boolean @default(false)
+  sequence          Int     @default(0)
+
+  appointmentType AppointmentType @relation(fields: [appointmentTypeId], references: [id], onDelete: Cascade)
+  answers         BookingAnswer[]
+}
+
+model Booking {
+  id                String        @id @default(cuid())
+  customerId        String
+  appointmentTypeId String
+  resourceId        String?
+  scheduledStart    DateTime
+  scheduledEnd      DateTime
+  capacity          Int           @default(1)
+  status            BookingStatus @default(CONFIRMED)
+  paymentStatus     PaymentStatus @default(UNPAID)
+  paymentAmount     Decimal?      @db.Decimal(10, 2)
+  paymentReference  String?
+  cancelReason      String?
+  confirmationCode  String        @unique @default(cuid())
+  bookedByAdminId   String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  customer        User            @relation("CustomerBookings", fields: [customerId], references: [id])
+  appointmentType AppointmentType @relation(fields: [appointmentTypeId], references: [id])
+  resource        Resource?       @relation(fields: [resourceId], references: [id])
+  answers         BookingAnswer[]
+  auditLog        BookingAuditLog[]
+}
+
+model BookingAnswer {
+  id         String @id @default(cuid())
+  bookingId  String
+  questionId String
+  answer     String
+
+  booking  Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  question BookingQuestion @relation(fields: [questionId], references: [id])
+}
+
+model BookingAuditLog {
+  id        String   @id @default(cuid())
+  bookingId String
+  actorId   String
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model AIChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  messages  Json
+  isExpired Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
