@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand palette */
+    --brand-primary: #0a0a1a;
+    --brand-accent: #6c63ff;
+    --brand-accent-hover: #5a52e0;
+    --brand-accent-2: #00d4aa;
+    --surface-1: #111127;
+    --surface-2: #1a1a35;
+    --surface-3: #242444;
+    --border-color: #2e2e55;
+    --text-primary: #f0f0ff;
+    --text-secondary: #9999cc;
+    --text-muted: #666699;
+    --c-success: #00d4aa;
+    --c-warning: #f0a500;
+    --c-danger: #ff4d6d;
+    --c-info: #4da6ff;
+
+    /* shadcn HSL vars (dark by default) */
+    --background: 240 10% 7%;
+    --foreground: 240 30% 95%;
+    --card: 240 20% 13%;
+    --card-foreground: 240 30% 95%;
+    --popover: 240 20% 13%;
+    --popover-foreground: 240 30% 95%;
+    --primary: 246 100% 69%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 20% 20%;
+    --secondary-foreground: 240 30% 90%;
+    --muted: 240 20% 20%;
+    --muted-foreground: 240 20% 60%;
+    --accent: 240 20% 22%;
+    --accent-foreground: 240 30% 95%;
+    --destructive: 349 100% 65%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 25% 25%;
+    --input: 240 20% 18%;
+    --ring: 246 100% 69%;
+    --radius: 0.75rem;
+    --chart-1: 246 100% 69%;
+    --chart-2: 170 70% 55%;
+    --chart-3: 40 85% 60%;
+    --chart-4: 330 70% 55%;
+    --chart-5: 220 60% 50%;
+    --sidebar: 240 15% 8%;
+    --sidebar-foreground: 240 30% 95%;
+    --sidebar-primary: 246 100% 69%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 20% 22%;
+    --sidebar-accent-foreground: 240 30% 95%;
+    --sidebar-border: 240 25% 25%;
+    --sidebar-ring: 246 100% 69%;
+  }
+
+  [data-theme="light"] {
+    --brand-primary: #f8f8ff;
+    --surface-1: #ffffff;
+    --surface-2: #f0f0ff;
+    --surface-3: #e8e8f8;
+    --border-color: #d0d0e8;
+    --text-primary: #0a0a1a;
+    --text-secondary: #444466;
+    --text-muted: #888899;
+
+    --background: 240 30% 99%;
+    --foreground: 240 30% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 30% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 30% 5%;
+    --border: 240 20% 88%;
+    --input: 240 20% 95%;
+    --muted: 240 20% 95%;
+    --muted-foreground: 240 15% 40%;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: var(--brand-primary);
+    color: var(--text-primary);
+    @apply bg-background text-foreground;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+}
+
+@layer components {
+  .slot-pill {
+    @apply px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-150 cursor-pointer select-none;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+  }
+  .slot-pill:hover:not(.slot-pill--disabled) {
+    border-color: var(--brand-accent);
+    color: var(--brand-accent);
+  }
+  .slot-pill--selected {
+    background-color: var(--brand-accent) !important;
+    border-color: var(--brand-accent) !important;
+    color: white !important;
+  }
+  .slot-pill--disabled {
+    @apply opacity-40 cursor-not-allowed pointer-events-none;
+  }
+  .surface-card {
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .status-badge--confirmed {
+    @apply inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full;
+    background: rgba(0, 212, 170, 0.15);
+    color: #00d4aa;
+    border: 1px solid rgba(0, 212, 170, 0.3);
+  }
+  .status-badge--pending {
+    @apply inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full;
+    background: rgba(240, 165, 0, 0.15);
+    color: #f0a500;
+    border: 1px solid rgba(240, 165, 0, 0.3);
+  }
+  .status-badge--cancelled {
+    @apply inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full;
+    background: rgba(255, 77, 109, 0.15);
+    color: #ff4d6d;
+    border: 1px solid rgba(255, 77, 109, 0.3);
+  }
+  .status-badge--completed {
+    @apply inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full;
+    background: rgba(153, 153, 204, 0.15);
+    color: #9999cc;
+    border: 1px solid rgba(153, 153, 204, 0.3);
+  }
+  .status-badge--rescheduled {
+    @apply inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full;
+    background: rgba(77, 166, 255, 0.15);
+    color: #4da6ff;
+    border: 1px solid rgba(77, 166, 255, 0.3);
+  }
+  .status-badge--no_show {
+    @apply inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full;
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+  }
+}
