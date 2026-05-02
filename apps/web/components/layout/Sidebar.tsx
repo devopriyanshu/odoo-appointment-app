@@ -46,9 +46,12 @@ export function Sidebar() {
   const role = user?.role || 'CUSTOMER'
   const visibleItems = uniqueNav.filter((item) => item.roles.includes(role))
 
+  const activeItem = visibleItems
+    .filter(item => item.href === '/' ? pathname === '/' : pathname.startsWith(item.href))
+    .sort((a, b) => b.href.length - a.href.length)[0]
+
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/'
-    return pathname.startsWith(href)
+    return activeItem?.href === href
   }
 
   return (
