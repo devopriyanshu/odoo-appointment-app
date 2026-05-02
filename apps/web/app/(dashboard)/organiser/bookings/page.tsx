@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { Download } from 'lucide-react'
-import { useBookings, useUpdateBookingStatus } from '@/hooks/useBookings'
+import { useBookings, useUpdateBookingStatus, useCancelBooking } from '@/hooks/useBookings'
 import { BookingStatusBadge } from '@/components/booking/BookingStatusBadge'
 import type { BookingStatus } from '@/types'
 
@@ -14,6 +14,7 @@ export default function OrganiserBookingsPage() {
   const [status, setStatus] = useState<string | undefined>(undefined)
   const { data, isLoading } = useBookings({ status, limit: 50 })
   const updateStatus = useUpdateBookingStatus()
+  const cancelBooking = useCancelBooking()
 
   const exportCSV = () => {
     window.open(`${process.env.NEXT_PUBLIC_API_URL}/bookings/export`, '_blank')
@@ -77,9 +78,21 @@ export default function OrganiserBookingsPage() {
                       </button>
                     )}
                     {b.status === 'CONFIRMED' && new Date(b.scheduledStart) < new Date() && (
-                      <button onClick={() => updateStatus.mutate({ id: b.id, action: 'complete' })}
-                        className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(108,99,255,0.15)', color: 'var(--brand-accent)' }}>
-                        Complete
+                      <>
+                        <button onClick={() => updateStatus.mutate({ id: b.id, action: 'complete' })}
+                          className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(108,99,255,0.15)', color: 'var(--brand-accent)' }}>
+                          Complete
+                        </button>
+                        <button onClick={() => updateStatus.mutate({ id: b.id, action: 'no-show' })}
+                          className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(240,165,0,0.15)', color: '#f0a500' }}>
+                          No-show
+                        </button>
+                      </>
+                    )}
+                    {(b.status === 'PENDING' || b.status === 'CONFIRMED') && new Date(b.scheduledStart) > new Date() && (
+                      <button onClick={() => cancelBooking.mutate({ id: b.id })}
+                        className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(255,77,109,0.15)', color: '#ff4d6d' }}>
+                        Cancel
                       </button>
                     )}
                   </div>

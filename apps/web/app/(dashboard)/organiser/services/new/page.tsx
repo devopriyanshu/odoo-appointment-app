@@ -141,6 +141,33 @@ export default function NewServicePage() {
             <input {...register('location')} className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }} placeholder="Address or Online" />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Service Type</label>
+              <div className="flex bg-[var(--surface-3)] p-1 rounded-xl">
+                {(['USER', 'RESOURCE'] as const).map(t => (
+                  <button type="button" key={t} onClick={() => setValue('resourceType', t)}
+                    className="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all"
+                    style={watch('resourceType') === t ? { background: 'var(--surface-1)', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: 'var(--text-muted)' }}>
+                    {t === 'USER' ? 'Personnel' : 'Facility/Eqp'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Schedule Type</label>
+              <div className="flex bg-[var(--surface-3)] p-1 rounded-xl">
+                {(['WEEKLY', 'FLEXIBLE'] as const).map(t => (
+                  <button type="button" key={t} onClick={() => setValue('slotScheduleType', t)}
+                    className="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all"
+                    style={watch('slotScheduleType') === t ? { background: 'var(--surface-1)', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' } : { color: 'var(--text-muted)' }}>
+                    {t === 'WEEKLY' ? 'Weekly' : 'Flexible'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Toggles */}
           {[
             { field: 'requiresManualConfirm' as const, label: 'Require manual confirmation' },
@@ -174,35 +201,49 @@ export default function NewServicePage() {
 
       {step === 2 && (
         <div className="space-y-4">
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Set your weekly availability. Slots will be generated based on these hours.</p>
-          <div className="space-y-2">
-            {workingHours.map((wh, i) => (
-              <div key={i} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
-                <button type="button" onClick={() => {
-                  const updated = [...workingHours]
-                  updated[i] = { ...updated[i], isActive: !updated[i].isActive }
-                  setWorkingHours(updated)
-                }} className="w-10 h-5 rounded-full relative transition-all" style={{ background: wh.isActive ? 'var(--brand-accent)' : 'var(--surface-3)', flexShrink: 0 }}>
-                  <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all" style={{ left: wh.isActive ? 22 : 2 }} />
-                </button>
-                <span className="text-sm font-medium w-24" style={{ color: wh.isActive ? 'var(--text-primary)' : 'var(--text-muted)' }}>{DAY_NAMES[wh.dayOfWeek]}</span>
-                {wh.isActive && (
-                  <div className="flex items-center gap-2">
-                    <input type="time" value={wh.startTime} onChange={(e) => { const u = [...workingHours]; u[i] = { ...u[i], startTime: e.target.value }; setWorkingHours(u) }}
-                      className="px-2 py-1 rounded-lg text-sm outline-none" style={{ background: 'var(--surface-3)', color: 'var(--text-primary)' }} />
-                    <span style={{ color: 'var(--text-muted)' }}>–</span>
-                    <input type="time" value={wh.endTime} onChange={(e) => { const u = [...workingHours]; u[i] = { ...u[i], endTime: e.target.value }; setWorkingHours(u) }}
-                      className="px-2 py-1 rounded-lg text-sm outline-none" style={{ background: 'var(--surface-3)', color: 'var(--text-primary)' }} />
+          {watch('slotScheduleType') === 'FLEXIBLE' ? (
+             <div className="rounded-xl p-5 text-center space-y-2" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
+               <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Flexible Schedule</p>
+               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>You selected a flexible schedule. You can create specific date/time slots from the service edit page after creation.</p>
+               <button onClick={() => setStep(3)}
+                 className="w-full mt-4 py-3 rounded-xl text-sm font-semibold text-white hover:opacity-90"
+                 style={{ background: 'var(--brand-accent)' }}>
+                 Continue →
+               </button>
+             </div>
+          ) : (
+            <>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Set your weekly availability. Slots will be generated based on these hours.</p>
+              <div className="space-y-2">
+                {workingHours.map((wh, i) => (
+                  <div key={i} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
+                    <button type="button" onClick={() => {
+                      const updated = [...workingHours]
+                      updated[i] = { ...updated[i], isActive: !updated[i].isActive }
+                      setWorkingHours(updated)
+                    }} className="w-10 h-5 rounded-full relative transition-all" style={{ background: wh.isActive ? 'var(--brand-accent)' : 'var(--surface-3)', flexShrink: 0 }}>
+                      <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all" style={{ left: wh.isActive ? 22 : 2 }} />
+                    </button>
+                    <span className="text-sm font-medium w-24" style={{ color: wh.isActive ? 'var(--text-primary)' : 'var(--text-muted)' }}>{DAY_NAMES[wh.dayOfWeek]}</span>
+                    {wh.isActive && (
+                      <div className="flex items-center gap-2">
+                        <input type="time" value={wh.startTime} onChange={(e) => { const u = [...workingHours]; u[i] = { ...u[i], startTime: e.target.value }; setWorkingHours(u) }}
+                          className="px-2 py-1 rounded-lg text-sm outline-none" style={{ background: 'var(--surface-3)', color: 'var(--text-primary)' }} />
+                        <span style={{ color: 'var(--text-muted)' }}>–</span>
+                        <input type="time" value={wh.endTime} onChange={(e) => { const u = [...workingHours]; u[i] = { ...u[i], endTime: e.target.value }; setWorkingHours(u) }}
+                          className="px-2 py-1 rounded-lg text-sm outline-none" style={{ background: 'var(--surface-3)', color: 'var(--text-primary)' }} />
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
-          <button onClick={onStep2} disabled={setWH.isPending}
-            className="w-full py-3 rounded-xl text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
-            style={{ background: 'var(--brand-accent)' }}>
-            {setWH.isPending ? 'Saving...' : 'Continue →'}
-          </button>
+              <button onClick={onStep2} disabled={setWH.isPending}
+                className="w-full py-3 rounded-xl text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                style={{ background: 'var(--brand-accent)' }}>
+                {setWH.isPending ? 'Saving...' : 'Continue →'}
+              </button>
+            </>
+          )}
         </div>
       )}
 

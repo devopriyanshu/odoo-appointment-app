@@ -1,17 +1,33 @@
 'use client'
 import { useState } from 'react'
-import { User, Phone, Mail, Save } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { User, Phone, Mail, Save, Clock, CalendarCheck, ChevronRight } from 'lucide-react'
+import { format } from 'date-fns'
 import { useAuthStore } from '@/store/authStore'
 import { useMe } from '@/hooks/useAuth'
+import { useBookings } from '@/hooks/useBookings'
+import { BookingStatusBadge } from '@/components/booking/BookingStatusBadge'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import type { Booking } from '@/types'
 
 export default function ProfilePage() {
+  const router = useRouter()
   const { user, setUser } = useAuthStore()
   const { refetch } = useMe()
+  const { data: bookingsData } = useBookings({ limit: 50 })
   const [name, setName] = useState(user?.name || '')
   const [phone, setPhone] = useState(user?.phone || '')
   const [saving, setSaving] = useState(false)
+
+  const bookings = bookingsData?.bookings || []
+  const now = new Date()
+  const upcoming = bookings
+    .filter((b: Booking) => new Date(b.scheduledStart) >= now && b.status !== 'CANCELLED')
+    .slice(0, 5)
+  const past = bookings
+    .filter((b: Booking) => new Date(b.scheduledStart) < now && b.status !== 'CANCELLED')
+    .slice(0, 5)
 
   const handleSave = async () => {
     setSaving(true)
@@ -126,6 +142,75 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
+
+      {/* Upcoming Appointments */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold flex items-center gap-2"
+            style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--text-primary)' }}>
+            <Clock size={16} style={{ color: 'var(--brand-accent)' }} />
+            Upcoming Appointments
+          </h2>
+          <button onClick={() => router.push('/appointments')} className="text-xs flex items-center gap-1"
+            style={{ color: 'var(--brand-accent)' }}>
+            View all <ChevronRight size={12} />
+          </button>
+        </div>
+        {upcoming.length === 0 ? (
+          <div className="rounded-2xl p-6 text-center text-sm" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
+            No upcoming appointments
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {upcoming.map((b: Booking) => (
+              <div key={b.id} onClick={() => router.push(`/appointments/${b.id}`)}
+                className="rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all hover:bg-[var(--surface-3)]"
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{b.appointmentType?.name}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {format(new Date(b.scheduledStart), 'EEE, MMM d • h:mm a')}
+                  </p>
+                </div>
+                <BookingStatusBadge status={b.status} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Past Appointments */}
+      <div className="mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold flex items-center gap-2"
+            style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--text-primary)' }}>
+            <CalendarCheck size={16} style={{ color: '#00d4aa' }} />
+            Past Appointments
+          </h2>
+        </div>
+        {past.length === 0 ? (
+          <div className="rounded-2xl p-6 text-center text-sm" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
+            No past appointments
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {past.map((b: Booking) => (
+              <div key={b.id} onClick={() => router.push(`/appointments/${b.id}`)}
+                className="rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all hover:bg-[var(--surface-3)]"
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border-color)' }}>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{b.appointmentType?.name}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {format(new Date(b.scheduledStart), 'EEE, MMM d • h:mm a')}
+                  </p>
+                </div>
+                <BookingStatusBadge status={b.status} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
+

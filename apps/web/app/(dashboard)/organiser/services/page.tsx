@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { Plus, Briefcase, Edit, Eye, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
+import { Plus, Briefcase, Edit, Eye, ToggleLeft, ToggleRight, Trash2, ExternalLink } from 'lucide-react'
 import { useMyServices, useTogglePublish, useDeleteService } from '@/hooks/useServices'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
@@ -71,6 +71,12 @@ export default function ServicesPage() {
                       <button onClick={() => router.push(`/organiser/services/${s.id}`)} className="p-1.5 rounded-lg hover:bg-[var(--surface-3)]" style={{ color: 'var(--text-muted)' }} title="Edit">
                         <Edit size={14} />
                       </button>
+                      {s.shareToken && (
+                        <a href={`/book/share/${s.shareToken}`} target="_blank" rel="noreferrer"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-3)] block" style={{ color: 'var(--text-muted)' }} title="Preview / Share">
+                          <ExternalLink size={14} />
+                        </a>
+                      )}
                       <button onClick={() => { const tp = useTogglePublish; /* handled below */ api_toggle(s.id) }} className="p-1.5 rounded-lg hover:bg-[var(--surface-3)]" style={{ color: 'var(--text-muted)' }} title={s.isPublished ? 'Unpublish' : 'Publish'}>
                         {s.isPublished ? <ToggleRight size={14} style={{ color: '#00d4aa' }} /> : <ToggleLeft size={14} />}
                       </button>

@@ -87,3 +87,35 @@ export function useLogout() {
     },
   })
 }
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: async (data: { email: string }) => {
+      const res = await api.post('/auth/forgot-password', data)
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success('Reset link sent! Check your email (or server logs for demo).')
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to send reset link'
+      toast.error(msg)
+    },
+  })
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: async (data: { token: string; password: string }) => {
+      const res = await api.post('/auth/reset-password', data)
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success('Password reset successfully!')
+    },
+    onError: (error: unknown) => {
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Reset failed'
+      toast.error(msg)
+    },
+  })
+}
