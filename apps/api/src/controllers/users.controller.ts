@@ -3,8 +3,10 @@ import { asyncHandler } from '../utils/asyncHandler'
 import { prisma } from '../config/database'
 import { ApiError } from '../utils/ApiError'
 
-export const listUsers = asyncHandler(async (_req: Request, res: Response) => {
+export const listUsers = asyncHandler(async (req: Request, res: Response) => {
+  const where = req.user?.role === 'ORGANISER' ? { role: 'CUSTOMER' as const } : undefined
   const users = await prisma.user.findMany({
+    where,
     select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true, phone: true },
     orderBy: { createdAt: 'desc' },
   })
@@ -21,11 +23,15 @@ export const getUser = asyncHandler(async (req: Request, res: Response) => {
 })
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
-  const { name, phone } = req.body
+  const { name, phone, isActive } = req.body
+  const data: Record<string, unknown> = {}
+  if (name !== undefined) data.name = name
+  if (phone !== undefined) data.phone = phone
+  if (isActive !== undefined) data.isActive = isActive
   const user = await prisma.user.update({
     where: { id: req.params.id },
-    data: { name, phone },
-    select: { id: true, name: true, email: true, role: true, phone: true },
+    data,
+    select: { id: true, name: true, email: true, role: true, phone: true, isActive: true },
   })
   res.json({ success: true, user })
 })

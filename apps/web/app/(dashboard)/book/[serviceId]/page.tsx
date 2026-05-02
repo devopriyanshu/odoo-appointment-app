@@ -2,10 +2,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 import { ChevronLeft, ChevronRight, User } from 'lucide-react'
 import { useService } from '@/hooks/useServices'
 import { useSlots } from '@/hooks/useSlots'
 import { useCreateBooking } from '@/hooks/useBookings'
+import { useUsers } from '@/hooks/useUsers'
+import { useAuthStore } from '@/store/authStore'
 import { DatePicker } from '@/components/booking/DatePicker'
 import { SlotGrid } from '@/components/booking/SlotGrid'
 import { CapacitySelector } from '@/components/booking/CapacitySelector'
@@ -28,6 +31,11 @@ export default function BookServicePage({ params }: { params: { serviceId: strin
   const { data: service, isLoading } = useService(serviceId)
   const createBooking = useCreateBooking()
 
+  const { user } = useAuthStore()
+  const isOrganiser = user?.role === 'ORGANISER' || user?.role === 'ADMIN'
+  const { data: usersData } = useUsers({ enabled: isOrganiser })
+
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedSlot, setSelectedSlot] = useState<SlotResult | null>(null)
@@ -61,6 +69,10 @@ export default function BookServicePage({ params }: { params: { serviceId: strin
   const stepIndex = visibleSteps.findIndex(s => s.key === step)
 
   const goNext = () => {
+    if (step === 'datetime' && isOrganiser && !selectedCustomerId) {
+      toast.error('Please select a customer to book on behalf of')
+      return
+    }
     const next = visibleSteps[stepIndex + 1]
     if (next) setStep(next.key)
   }
@@ -79,6 +91,7 @@ export default function BookServicePage({ params }: { params: { serviceId: strin
       capacity,
       answers,
       paymentReference: paymentRef || undefined,
+      customerId: selectedCustomerId || undefined,
     }).catch(() => null)
     if (booking) router.push(`/appointments/${booking.id}?confirmed=1`)
   }
@@ -120,6 +133,27 @@ export default function BookServicePage({ params }: { params: { serviceId: strin
           </div>
         ))}
       </div>
+
+      {/* Customer selector (if organiser) */}
+      {isOrganiser && step === 'datetime' && (
+        <div className="mb-5">
+          <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>Book on behalf of</h2>
+          <select 
+            value={selectedCustomerId}
+            onChange={(e) => setSelectedCustomerId(e.target.value)}
+            className="w-full max-w-sm px-3 py-2.5 rounded-xl text-sm outline-none"
+            style={{ background: 'var(--surface-2)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+          >
+            <option value="">Select a customer</option>
+            {usersData?.users?.map((u: any) => (
+              <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+            ))}
+          </select>
+          {(!usersData?.users || usersData.users.length === 0) && (
+            <p className="text-xs text-red-500 mt-1">No customers found or still loading...</p>
+          )}
+        </div>
+      )}
 
       {/* Provider selector (if multiple) */}
       {service.resources && service.resources.length > 1 && step === 'datetime' && (
@@ -215,12 +249,12 @@ export default function BookServicePage({ params }: { params: { serviceId: strin
           </div>
           {step !== 'payment' && step !== 'questions' && (
             <button
-              disabled={!selectedSlot}
-              onClick={goNext}
+              disabled={!selectedSlot || createBooking.isPending}
+              onClick={stepIndex === visibleSteps.length - 1 ? handleSubmit(onSubmit) : goNext}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40"
               style={{ background: 'var(--brand-accent)' }}
             >
-              Continue <ChevronRight size={16} />
+              {createBooking.isPending ? 'Booking...' : stepIndex === visibleSteps.length - 1 ? 'Confirm Booking' : <>Continue <ChevronRight size={16} /></>}
             </button>
           )}
           {step === 'questions' && (

@@ -22,6 +22,9 @@ export const getBooking = asyncHandler(async (req: Request, res: Response) => {
 })
 
 export const createBooking = asyncHandler(async (req: Request, res: Response) => {
+  if (req.body.customerId && req.user!.role !== 'ORGANISER' && req.user!.role !== 'ADMIN') {
+    delete req.body.customerId
+  }
   const booking = await bookingService.createBooking(req.body, req.user!.id)
   res.status(201).json({ success: true, booking })
 })
