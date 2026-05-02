@@ -10,6 +10,7 @@ router.use(authenticate)
 
 router.post('/chat', ctrl.chat)
 router.post('/voice', upload.single('audio'), ctrl.voice)
+router.post('/transcribe', upload.single('audio'), ctrl.transcribe)
 router.post('/confirm-booking', ctrl.confirmAIBooking)
 
 export default router

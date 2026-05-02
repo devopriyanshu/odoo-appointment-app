@@ -109,6 +109,16 @@ export const voice = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, transcript, responseText, bookingAction, audioBase64, sessionId: session.id })
 })
 
+export const transcribe = asyncHandler(async (req: Request, res: Response) => {
+  const audioBuffer = (req as any).file?.buffer
+  const languageCode = req.body?.languageCode || 'en-IN'
+  if (!audioBuffer) {
+    return res.status(400).json({ success: false, message: 'Audio file required' })
+  }
+  const transcript = await aiService.speechToText(audioBuffer, languageCode)
+  res.json({ success: true, transcript, languageCode })
+})
+
 export const confirmAIBooking = asyncHandler(async (req: Request, res: Response) => {
   const { appointmentTypeId, resourceId, scheduledStart, capacity, sessionId } = req.body
 

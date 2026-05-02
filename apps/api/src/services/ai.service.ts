@@ -10,22 +10,31 @@ const sarvamClient = axios.create({
   timeout: 30000,
 })
 
-export async function speechToText(audioBuffer: Buffer, languageCode = 'hi-IN'): Promise<string> {
+export async function speechToText(audioBuffer: Buffer, languageCode = 'en-IN'): Promise<string> {
   if (!env.SARVAM_API_KEY) throw new ApiError(503, 'AI service not configured')
 
   const form = new FormData()
   form.append('file', audioBuffer, { filename: 'audio.webm', contentType: 'audio/webm' })
+  form.append('model', 'saarika:v2.5')
   form.append('language_code', languageCode)
-  form.append('model', 'saarika:v2')
 
   try {
     const res = await sarvamClient.post('/speech-to-text', form, {
       headers: form.getHeaders(),
     })
     return res.data.transcript ?? ''
-  } catch (err) {
-    logger.error('Sarvam STT error', { err })
-    throw new ApiError(503, 'Speech recognition unavailable')
+  } catch (err: unknown) {
+    const ax = err as { response?: { status?: number; data?: unknown }; message?: string }
+    logger.error('Sarvam STT error', {
+      status: ax.response?.status,
+      data: ax.response?.data,
+      message: ax.message,
+    })
+    const apiMsg =
+      typeof ax.response?.data === 'object' && ax.response?.data
+        ? JSON.stringify(ax.response.data)
+        : ax.message || 'Speech recognition unavailable'
+    throw new ApiError(503, `Sarvam STT: ${apiMsg}`)
   }
 }
 
