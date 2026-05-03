@@ -24,7 +24,7 @@ function getTitle(pathname: string) {
   if (pathname.startsWith('/book')) return 'Book Appointment'
   if (pathname.startsWith('/appointments')) return 'Appointment Detail'
   if (pathname.startsWith('/organiser/services')) return 'Services'
-  return 'AppointmentPro'
+  return 'AppointEase'
 }
 
 export function Topbar() {

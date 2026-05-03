@@ -15,6 +15,7 @@ const router = Router()
 
 router.post('/signup', authLimiter, validate(signupSchema), authController.signup)
 router.post('/verify-otp', authLimiter, validate(verifyOtpSchema), authController.verifyOtp)
+router.post('/resend-otp', authLimiter, authController.resendOtp)
 router.post('/login', authLimiter, validate(loginSchema), authController.login)
 router.post('/logout', authController.logout)
 router.get('/me', authenticate, authController.getMe)

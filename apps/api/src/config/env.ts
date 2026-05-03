@@ -14,6 +14,11 @@ const envSchema = z.object({
   FRONTEND_URL: z.string().default('http://localhost:3000'),
   SARVAM_API_KEY: z.string().optional(),
   SARVAM_API_BASE: z.string().default('https://api.sarvam.ai'),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().default('587'),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  FROM_EMAIL: z.string().default('AppointEase <noreply@appointease.local>'),
 })
 
 export const env = envSchema.parse(process.env)

@@ -37,7 +37,7 @@ export default function LoginPage() {
             <Calendar size={24} className="text-white" />
           </div>
           <span className="text-2xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--text-primary)' }}>
-            AppointmentPro
+            AppointEase
           </span>
         </div>
 

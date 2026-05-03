@@ -9,12 +9,7 @@ import { Calendar, Eye, EyeOff, CheckCircle, ArrowLeft } from 'lucide-react'
 import { useResetPassword } from '@/hooks/useAuth'
 
 const schema = z.object({
-  password: z
-    .string()
-    .min(8, 'Min 8 chars')
-    .regex(/[A-Z]/, 'Needs uppercase')
-    .regex(/[0-9]/, 'Needs number')
-    .regex(/[^a-zA-Z0-9]/, 'Needs special char'),
+  password: z.string().min(8, 'Min 8 chars'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
@@ -68,7 +63,7 @@ function ResetPasswordInner() {
             <Calendar size={24} className="text-white" />
           </div>
           <span className="text-2xl font-bold" style={{ fontFamily: 'Plus Jakarta Sans', color: 'var(--text-primary)' }}>
-            AppointmentPro
+            AppointEase
           </span>
         </div>
 
@@ -92,7 +87,7 @@ function ResetPasswordInner() {
                     <input
                       {...register('password')}
                       type={showPw ? 'text' : 'password'}
-                      placeholder="Min 8 chars, uppercase, number, symbol"
+                      placeholder="Min 8 chars"
                       className="w-full px-4 py-3 pr-12 rounded-xl text-sm outline-none"
                       style={{ background: 'var(--surface-3)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                     />

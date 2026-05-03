@@ -96,12 +96,31 @@ export function ReportChart({ report }: Props) {
           </tr>
         </thead>
         <tbody>
-          {data.map((r) => (
-            <tr key={r.key} style={{ borderTop: '1px solid var(--border-color)' }}>
-              <td className="px-4 py-2" style={{ color: 'var(--text-primary)' }}>{r.label}</td>
-              <td className="px-4 py-2 text-right font-mono" style={{ color: 'var(--text-primary)' }}>{fmt(r.value)}</td>
-            </tr>
-          ))}
+          {data.map((r) => {
+            if (r.meta?.scheduledStart) {
+              return (
+                <tr key={r.key} style={{ borderTop: '1px solid var(--border-color)' }}>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{r.label}</div>
+                    <div className="text-xs mt-1 space-y-0.5" style={{ color: 'var(--text-secondary)' }}>
+                      <div>{new Date(r.meta.scheduledStart as string).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</div>
+                      <div className="flex gap-2">
+                        {r.meta.provider && <span>Provider: {r.meta.provider as string}</span>}
+                        {r.meta.status && <span>Status: {r.meta.status as string}</span>}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right align-top font-mono" style={{ color: 'var(--text-primary)' }}>{fmt(r.value)}</td>
+                </tr>
+              )
+            }
+            return (
+              <tr key={r.key} style={{ borderTop: '1px solid var(--border-color)' }}>
+                <td className="px-4 py-2" style={{ color: 'var(--text-primary)' }}>{r.label}</td>
+                <td className="px-4 py-2 text-right font-mono" style={{ color: 'var(--text-primary)' }}>{fmt(r.value)}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

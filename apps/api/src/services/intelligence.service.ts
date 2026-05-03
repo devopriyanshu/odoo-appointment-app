@@ -430,6 +430,30 @@ export async function runReport(spec: QuerySpec, user: { id: string; role: strin
       else if (spec.groupBy === 'status') chartHint = 'pie'
       else chartHint = 'bar'
     }
+  } else if (chartHint === 'table' && spec.metric === 'bookings') {
+    const rows = await prisma.booking.findMany({
+      where: dated,
+      orderBy: { scheduledStart: 'desc' },
+      take: spec.limit ?? 10,
+      include: {
+        customer: { select: { name: true, email: true } },
+        appointmentType: { select: { name: true } },
+        resource: { select: { name: true } },
+      },
+    })
+    data = rows.map((r) => ({
+      key: r.id,
+      label: `${r.customer.name} - ${r.appointmentType.name}`,
+      value: Number(r.paymentAmount ?? 0),
+      meta: {
+        scheduledStart: r.scheduledStart,
+        scheduledEnd: r.scheduledEnd,
+        status: r.status,
+        provider: r.resource?.name,
+        customerEmail: r.customer.email,
+        paymentStatus: r.paymentStatus,
+      },
+    }))
   }
 
   const title = buildTitle(spec)

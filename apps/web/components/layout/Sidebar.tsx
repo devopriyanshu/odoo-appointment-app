@@ -75,7 +75,7 @@ export function Sidebar() {
               exit={{ opacity: 0, width: 0 }}
               className="ml-3 font-bold text-base whitespace-nowrap overflow-hidden text-white"
             >
-              Slotly
+              AppointEase
             </motion.span>
           )}
         </AnimatePresence>

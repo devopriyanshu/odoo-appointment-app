@@ -8,6 +8,7 @@ import { env } from '../config/env'
 import { ApiError } from '../utils/ApiError'
 import { logger } from '../utils/logger'
 import { SignupInput, LoginInput } from '../validators/auth.validator'
+import { sendOtpEmail, sendPasswordResetEmail } from './email.service'
 
 function generateOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString()
@@ -68,9 +69,42 @@ export async function signup(data: SignupInput) {
   const otp = generateOtp()
   await redis.set(`otp:${otpToken}`, JSON.stringify({ otp, userId: user.id }), 'EX', 300)
 
+  // Send OTP via email; log too so dev still works without SMTP
   logger.info(`OTP for ${data.email}: ${otp}`)
+  const result = await sendOtpEmail(data.email, data.name, otp)
+  const emailSent = !('error' in result) && !('stubbed' in result)
 
-  return { otpToken, message: 'OTP sent to your email' }
+  // In dev/test, expose the OTP so the UI can auto-fill — saves dev from
+  // depending on email delivery. Never include this in production.
+  const exposeOtp = env.NODE_ENV !== 'production'
+
+  return {
+    otpToken,
+    message: emailSent
+      ? 'A 6-digit code has been sent to your email.'
+      : exposeOtp
+        ? 'OTP generated (email skipped in dev). Use the code below to verify.'
+        : 'OTP generated (email delivery unavailable — please contact support).',
+    ...(exposeOtp ? { devOtp: otp } : {}),
+  }
+}
+
+export async function resendOtp(otpToken: string) {
+  const stored = await redis.get(`otp:${otpToken}`)
+  if (!stored) throw new ApiError(400, 'OTP session expired. Please sign up again.')
+  const { userId } = JSON.parse(stored) as { otp: string; userId: string }
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) throw new ApiError(404, 'User not found')
+
+  const otp = generateOtp()
+  await redis.set(`otp:${otpToken}`, JSON.stringify({ otp, userId }), 'EX', 300)
+  logger.info(`Resent OTP for ${user.email}: ${otp}`)
+  await sendOtpEmail(user.email, user.name, otp)
+  const exposeOtp = env.NODE_ENV !== 'production'
+  return {
+    message: 'A new code has been sent.',
+    ...(exposeOtp ? { devOtp: otp } : {}),
+  }
 }
 
 export async function verifyOtp(otpToken: string, otp: string) {
@@ -125,13 +159,16 @@ export async function getMe(userId: string) {
 
 export async function forgotPassword(email: string) {
   const user = await prisma.user.findUnique({ where: { email } })
-  if (!user) return { message: 'If that email exists, a reset link has been sent.' }
+  // Always return the same message to prevent enumeration
+  const ack = { message: 'If that email exists, a reset link has been sent.' }
+  if (!user) return ack
 
   const resetToken = uuidv4()
   await redis.set(`reset:${resetToken}`, user.id, 'EX', 600)
-  logger.info(`Password reset link for ${email}: /reset-password?token=${resetToken}`)
-
-  return { message: 'Password reset link has been sent (check server logs for demo)', resetToken }
+  const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${resetToken}`
+  logger.info(`Password reset link for ${email}: ${resetUrl}`)
+  await sendPasswordResetEmail(user.email, user.name, resetUrl)
+  return ack
 }
 
 export async function resetPassword(token: string, newPassword: string) {

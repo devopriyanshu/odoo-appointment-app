@@ -14,6 +14,13 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, user })
 })
 
+export const resendOtp = asyncHandler(async (req: Request, res: Response) => {
+  const { otpToken } = req.body
+  if (!otpToken) return res.status(400).json({ success: false, message: 'otpToken required' })
+  const result = await authService.resendOtp(otpToken)
+  res.json({ success: true, ...result })
+})
+
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { tokens, user } = await authService.login(req.body)
   authService.setAuthCookies(res, tokens)

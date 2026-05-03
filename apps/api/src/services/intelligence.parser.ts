@@ -34,7 +34,7 @@ const CHART_PATTERNS: Array<[ChartHint, RegExp]> = [
   ['line', /\b(line|trend over time)\b/i],
   ['bar', /\b(bar)\b/i],
   ['pie', /\b(pie|donut)\b/i],
-  ['table', /\b(table|list|raw)\b/i],
+  ['table', /\b(table|list|raw|detail(?:s)?)\b/i],
 ]
 
 function extractDateRange(text: string): { from?: string; to?: string } {
@@ -131,7 +131,7 @@ export async function parsePromptToSpec(
   const range = extractDateRange(text)
   const serviceIds = await extractServiceFilter(text, user.id, user.role === 'ADMIN')
 
-  const limitMatch = text.match(/\btop\s+(\d+)\b/i)
+  const limitMatch = text.match(/\b(?:top|last)\s+(\d+)\b(?!\s+(?:day|week|month))/i)
   const limit = limitMatch ? parseInt(limitMatch[1], 10) : undefined
 
   return {

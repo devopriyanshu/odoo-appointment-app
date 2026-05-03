@@ -3,7 +3,7 @@ import './globals.css'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: 'AppointmentPro — The Perfect Booking System',
+  title: 'AppointEase — The Perfect Booking System',
   description: 'Book appointments easily with real-time availability',
 }
 
