@@ -14,6 +14,7 @@ import slotRoutes from './routes/slots.routes'
 import bookingRoutes from './routes/bookings.routes'
 import analyticsRoutes from './routes/analytics.routes'
 import aiRoutes from './routes/ai.routes'
+import intelligenceRoutes from './routes/intelligence.routes'
 
 const app = express()
 
@@ -38,6 +39,7 @@ app.use('/api/slots', slotRoutes)
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/analytics', analyticsRoutes)
 app.use('/api/ai', aiRoutes)
+app.use('/api/intelligence', intelligenceRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date() }))
 

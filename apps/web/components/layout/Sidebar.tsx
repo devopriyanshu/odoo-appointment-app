@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutGrid, CalendarCheck, User, BarChart2, Briefcase,
-  BookOpen, Calendar, Shield, Users, TrendingUp, ChevronLeft,
-  ChevronRight, LogOut, MessageCircle
+  BookOpen, Calendar, Users, TrendingUp, ChevronLeft,
+  ChevronRight, LogOut, Sparkles, UserPlus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
@@ -20,15 +20,16 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Home', href: '/', icon: <LayoutGrid size={20} />, roles: ['CUSTOMER', 'ORGANISER'] },
+  { label: 'Home', href: '/', icon: <LayoutGrid size={20} />, roles: ['CUSTOMER'] },
   { label: 'My Appointments', href: '/appointments', icon: <CalendarCheck size={20} />, roles: ['CUSTOMER'] },
   { label: 'Dashboard', href: '/organiser', icon: <BarChart2 size={20} />, roles: ['ORGANISER', 'ADMIN'] },
   { label: 'My Services', href: '/organiser/services', icon: <Briefcase size={20} />, roles: ['ORGANISER'] },
+  { label: 'Book for Customer', href: '/organiser/book-for-customer', icon: <UserPlus size={20} />, roles: ['ORGANISER', 'ADMIN'] },
   { label: 'All Bookings', href: '/organiser/bookings', icon: <BookOpen size={20} />, roles: ['ORGANISER', 'ADMIN'] },
   { label: 'Calendar', href: '/organiser/calendar', icon: <Calendar size={20} />, roles: ['ORGANISER', 'ADMIN'] },
+  { label: 'Intelligence', href: '/organiser/intelligence', icon: <Sparkles size={20} />, roles: ['ORGANISER', 'ADMIN'] },
   { label: 'Users', href: '/admin/users', icon: <Users size={20} />, roles: ['ADMIN'] },
   { label: 'Analytics', href: '/organiser/analytics', icon: <TrendingUp size={20} />, roles: ['ORGANISER'] },
-  { label: 'My Appointments', href: '/appointments', icon: <CalendarCheck size={20} />, roles: ['ORGANISER'] },
   { label: 'Profile', href: '/profile', icon: <User size={20} />, roles: ['CUSTOMER', 'ORGANISER', 'ADMIN'] },
 ]
 

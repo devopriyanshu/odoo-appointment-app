@@ -37,8 +37,10 @@ export default function HomePage() {
   })
 
   useEffect(() => {
-    if (user?.role === 'ADMIN') router.replace('/organiser')
+    if (user?.role === 'ADMIN' || user?.role === 'ORGANISER') router.replace('/organiser')
   }, [user?.role, router])
+
+  if (user?.role === 'ADMIN' || user?.role === 'ORGANISER') return null
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 250)

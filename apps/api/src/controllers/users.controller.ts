@@ -13,6 +13,26 @@ export const listUsers = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, users })
 })
 
+/** Compact customer search/list for organisers and admins booking on behalf. */
+export const listCustomers = asyncHandler(async (req: Request, res: Response) => {
+  const q = (req.query.q as string | undefined)?.trim()
+  const where: Record<string, unknown> = { role: 'CUSTOMER', isActive: true }
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: 'insensitive' } },
+      { email: { contains: q, mode: 'insensitive' } },
+      { phone: { contains: q, mode: 'insensitive' } },
+    ]
+  }
+  const customers = await prisma.user.findMany({
+    where,
+    select: { id: true, name: true, email: true, phone: true },
+    orderBy: { name: 'asc' },
+    take: 50,
+  })
+  res.json({ success: true, customers })
+})
+
 export const getUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await prisma.user.findUnique({
     where: { id: req.params.id },

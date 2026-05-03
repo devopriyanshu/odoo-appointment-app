@@ -8,6 +8,7 @@ const router = Router()
 router.use(authenticate)
 
 router.get('/', requireRole('ADMIN', 'ORGANISER'), usersController.listUsers)
+router.get('/customers', requireRole('ADMIN', 'ORGANISER'), usersController.listCustomers)
 router.get('/:id', usersController.getUser)
 router.patch('/:id', usersController.updateUser)
 router.delete('/:id', requireRole('ADMIN'), usersController.deleteUser)

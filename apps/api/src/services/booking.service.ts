@@ -12,7 +12,7 @@ interface CreateBookingData {
   paymentReference?: string
 }
 
-export async function createBooking(data: CreateBookingData, actorId: string) {
+export async function createBooking(data: CreateBookingData, actorId: string, actorRole?: string) {
   const lockKey = `slot_lock:${data.appointmentTypeId}:${data.scheduledStart}:${data.resourceId ?? 'any'}`
   const lockAcquired = await redis.set(lockKey, actorId, 'EX', 300, 'NX')
 
@@ -27,6 +27,33 @@ export async function createBooking(data: CreateBookingData, actorId: string) {
       })
       if (!service || !service.isPublished) {
         throw new ApiError(404, 'Service not found or not published')
+      }
+
+      // ── Role-based authorisation ─────────────────────────────────────
+      // ORGANISER: cannot book for themselves; must supply customerId AND
+      //            the service must belong to them. They cannot book on
+      //            services owned by other organisers.
+      // ADMIN:     may book on any service, with or without customerId
+      //            (default = themselves, but admins shouldn't typically book).
+      // CUSTOMER:  cannot pass customerId — must book for themselves.
+      if (actorRole === 'ORGANISER') {
+        if (service.organiserId !== actorId) {
+          throw new ApiError(403, 'You can only create bookings for your own services')
+        }
+        if (!data.customerId) {
+          throw new ApiError(400, 'Organisers must select a customer to book for')
+        }
+        if (data.customerId === actorId) {
+          throw new ApiError(400, 'Organisers cannot book appointments for themselves')
+        }
+        const customerExists = await tx.user.findUnique({
+          where: { id: data.customerId }, select: { role: true, isActive: true },
+        })
+        if (!customerExists || customerExists.role !== 'CUSTOMER' || !customerExists.isActive) {
+          throw new ApiError(400, 'Selected customer is invalid')
+        }
+      } else if (actorRole === 'CUSTOMER' && data.customerId && data.customerId !== actorId) {
+        throw new ApiError(403, 'Customers can only book for themselves')
       }
 
       const existing = await tx.booking.findMany({

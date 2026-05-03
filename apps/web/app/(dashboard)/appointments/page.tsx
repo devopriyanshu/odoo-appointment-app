@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/store/authStore'
 import { CalendarX, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { useBookings, useCancelBooking } from '@/hooks/useBookings'
 import { AppointmentCard } from '@/components/booking/AppointmentCard'
@@ -14,6 +15,12 @@ type Tab = 'upcoming' | 'past' | 'cancelled'
 
 export default function AppointmentsPage() {
   const router = useRouter()
+  const { user } = useAuthStore()
+  useEffect(() => {
+    if (user?.role === 'ORGANISER' || user?.role === 'ADMIN') {
+      router.replace('/organiser/bookings')
+    }
+  }, [user?.role, router])
   const [tab, setTab] = useState<Tab>('upcoming')
   const { data, isLoading } = useBookings({ limit: 50 })
   const bookings = data?.bookings || []

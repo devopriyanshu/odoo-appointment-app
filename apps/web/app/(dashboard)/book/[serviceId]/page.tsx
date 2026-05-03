@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -32,7 +32,15 @@ export default function BookServicePage({ params }: { params: { serviceId: strin
   const createBooking = useCreateBooking()
 
   const { user } = useAuthStore()
-  const isOrganiser = user?.role === 'ORGANISER' || user?.role === 'ADMIN'
+  // Organisers (and admins) book customers via the dedicated /organiser/book-for-customer
+  // flow which restricts to their own services. The public /book/[serviceId] route is
+  // for customers only.
+  useEffect(() => {
+    if (user?.role === 'ORGANISER' || user?.role === 'ADMIN') {
+      router.replace('/organiser/book-for-customer')
+    }
+  }, [user?.role, router])
+  const isOrganiser = false
   const { data: usersData } = useUsers({ enabled: isOrganiser })
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
