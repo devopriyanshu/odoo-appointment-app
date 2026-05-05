@@ -396,8 +396,8 @@ async function main() {
     }
   }
 
-  // 7. Bookings — generate ~300 across 90 days back + 14 days forward
-  const TOTAL_BOOKINGS = 320
+  // 7. Bookings — generate ~5000 across 365 days back + 14 days forward
+  const TOTAL_BOOKINGS = 5000
   const occupied = new Set<string>() // `${resourceId}|${ISOstart}` to avoid 1-capacity collisions
   let created = 0, skipped = 0
   const customerBookCount = new Map<string, number>()
@@ -425,7 +425,7 @@ async function main() {
     const isFuture = chance(0.12)  // ~12% future bookings
     const daysOffset = isFuture
       ? Math.floor(r() * 14)
-      : pickDayOffset(90)
+      : pickDayOffset(365)
     const baseDate = isFuture
       ? addDays(startOfDay(new Date()), daysOffset)
       : subDays(startOfDay(new Date()), daysOffset)
